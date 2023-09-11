@@ -1,0 +1,644 @@
+---
+title: "Portafolio A00829925"
+author: "Diego Rodriguez"
+date: "2023-08-25"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Exploración y preparación de la base de datos
+
+## Lectura de datos y Exploración
+
+Con base en varias encuestas de mercado, la consultora ha recopilado un gran conjunto de datos de diferentes tipos de automóviles en el mercado estadounidense que presenta en la siguiente base de datos:
+
+```{r}
+df = read.csv("precios_autos.csv")
+```
+
+*Exploración de variables numéricas* 
+
+```{r}
+# Exploración de variables numéricas:
+numeric_columns = sapply(df, is.numeric)
+summary(df[, numeric_columns])
+
+```
+
+*Estas medidas estadísticas proporcionan información descriptiva sobre las características de carros y sus precios en una base de datos. Aquí está la interpretación de cada una de ellas:*
+
+*symboling*: Esta variable parece representar una medida de seguridad o riesgo asociada al vehículo, posiblemente según algún sistema de clasificación. Los valores varían de -2 a 3, donde valores más bajos indican vehículos más seguros o menos riesgosos, y valores más altos indican vehículos menos seguros o más riesgosos.La media de 0.8341 sugiere un promedio ligeramente positivo en términos de seguridad en la muestra.
+
+*wheelbase*: La variable "wheelbase" se refiere a la distancia entre los ejes delantero y trasero del vehículo. Los valores oscilan entre 86.6 y 120.9. Esta medida puede estar relacionada con la estabilidad y el espacio interior del vehículo. Valores mayores podrían indicar más espacio interior. La mediana de 97.00 muestra que la mitad de los vehículos tienen una distancia entre ejes mayor a este valor.
+
+*carlength*, *carwidth*, *carheight*: Estas variables representan las dimensiones físicas del vehículo en términos de longitud, ancho y altura, respectivamente. Estas medidas son importantes para comprender el tamaño del automóvil y su apariencia general.
+
+*curbweight*: Esta variable se refiere al peso del vehículo en condiciones de operación normales, es decir, con todos los fluidos y equipos necesarios. Puede ser un indicador importante de la potencia necesaria para mover el vehículo y su eficiencia energética. La mediana de 2414 muestra que la mitad de los vehículos tienen un peso mayor a este valor. El valor máximo de 4066 indica el peso más alto en la muestra.
+
+*enginesize*: Representa el tamaño del motor del vehículo en términos de su capacidad cúbica. Motores más grandes suelen tener más potencia, lo que puede influir en el rendimiento del vehículo. La mediana de 120.0 muestra que la mitad de los vehículos tienen un tamaño de motor mayor a este valor. La media de 126.9 indica el promedio de los tamaños de motor de los vehículos en el conjunto de datos.
+
+*stroke*: La variable "stroke" se refiere a la longitud de la carrera del pistón en el motor. Esto puede tener efectos en el rendimiento y la eficiencia del motor. La mediana de 3.290 muestra que la mitad de los vehículos tienen una longitud de carrera mayor a este valor. La media de 3.255 indica el promedio de las longitudes de carrera de los vehículos en el conjunto de datos.
+
+*compressionratio*: Indica la relación de compresión del motor, que está relacionada con la eficiencia y el rendimiento del motor. Aunque el valor máximo es de 23.00, la media de compresión del motor es apenas de 10.14.
+
+*horsepower*: Representa la potencia del motor en caballos de fuerza. Esta medida está directamente relacionada con el rendimiento y la velocidad del vehículo. La mediana de 95.0 muestra que la mitad de los vehículos tienen una potencia mayor a este valo, mientras que la media es de 104.1 con un valor máximo de 288 caballos de fuerza.
+
+*peakrpm*: Es el número de revoluciones por minuto (RPM) en las que el motor produce su potencia máxima. Puede estar relacionado con la respuesta y la velocidad máxima del vehículo.
+
+*citympg*, *highwaympg*: Estas variables representan el consumo de combustible en millas por galón (MPG) en entornos urbanos y en carretera, respectivamente. Valores más altos indican mayor eficiencia de combustible.
+
+*price*: Esta es la variable objetivo en el análisis, que representa el precio del vehículo. Los valores varían desde 5118 hasta 45400. Esta variable es esencial para cualquier análisis de precios o modelado predictivo.
+
+*Exploración de las variables categóricas*
+```{r}
+# Exploración de variables categóricas:
+
+categoric_columns = sapply(df, is.character)
+
+for (i in names(categoric_columns[categoric_columns == TRUE])[-1]){
+  cat("Distribución de la variable", i, ': ')
+  print(table(df[i]))
+  cat("\n")
+}
+```
+
+*fueltype*: La variable "fueltype" tiene dos categorías únicas: "diesel" y "gas". En la muestra, hay 20 vehículos que funcionan con diésel y 185 vehículos que funcionan con gasolina.
+
+*carbody*: La variable "carbody" representa el tipo de carrocería de los vehículos. Las categorías únicas son "convertible", "hardtop", "hatchback", "sedan" y "wagon". La distribución muestra que hay 6 convertibles, 8 hardtops, 70 hatchbacks, 96 sedanes y 25 wagones en la muestra.
+
+*drivewheel*: La variable "drivewheel" indica el tipo de tracción en las ruedas de los vehículos. Las categorías son "4wd" (tracción en las cuatro ruedas), "fwd" (tracción delantera) y "rwd" (tracción trasera). Hay 9 vehículos con tracción en las cuatro ruedas, 120 con tracción delantera y 76 con tracción trasera.
+
+*enginelocation*: La variable "enginelocation" indica si el motor está ubicado en la parte delantera o trasera del vehículo. La distribución muestra que 202 vehículos tienen el motor en la parte delantera y solo 3 vehículos tienen el motor en la parte trasera.
+
+*enginetype*: La variable "enginetype" se refiere al tipo de motor de los vehículos. Las categorías son "dohc", "dohcv", "l", "ohc", "ohcf", "ohcv" y "rotor". Hay una distribución variada de tipos de motor en la muestra, con diferentes cantidades en cada categoría.
+
+*cylindernumber*: La variable "cylindernumber" indica la cantidad de cilindros en el motor de los vehículos. Las categorías son "eight", "five", "four", "six", "three", "twelve" y "two". La mayoría de los vehículos tienen motores de cuatro cilindros (159), seguidos de motores de seis cilindros (24) y cinco cilindros (11), entre otros.
+
+## Visualización de los datos
+
+### Boxplots
+```{r}
+#Boxplots
+
+create_boxplot <- function(data, column_name, treshold) {
+  values <- data[[column_name]]
+  values <- values[is.finite(values)]  # Filtrar valores finitos
+  
+  quantiles <- quantile(values, probs = c(0.25, 0.5, 0.75), na.rm = TRUE)
+  outlier_threshold <- treshold * IQR(values, na.rm = TRUE)
+  
+  bp <- boxplot(values, main=paste("Boxplot de", column_name), ylab="Valores", ylim=c(min(values), max(values)))
+  
+  # Agregar líneas del outlier threshold al boxplot
+  abline(h=quantiles[3] + outlier_threshold, col="red", lty=2)
+  abline(h=quantiles[1] - outlier_threshold, col="red", lty=2)
+  
+}
+
+for (i in names(numeric_columns[numeric_columns == TRUE])){
+  create_boxplot(df, i, 1.5)
+}
+```
+
+Gracias a las gráficas de boxplot de las variables numéricas podemos identificar la distribución de cuartiles, la media y la existencia de valores outliers en los datos. Por ejemplo identificamos que *wheelbase*, *carwith*, *enginesize*, *stroke*, *compressionratio*, *horsepower* y *price* contienen datos atípicos.
+
+
+### Removiendo outliers
+
+Para este análisis se considera un valor atípico aquellos datos que se alejan más de 1.5 veces el rango intercuartil de los q1 y q3, sin embargo, debido al contexto del problema, se considera que la mayoría de estos valores son posibles y reales, es decir, no errores de captura. Aun así, para que no sesguen ni generen ruido en el análisis se decidió que se eliminarán los valores que se alejen hasta 2 veces el rango intercuartil, con el objetivo de no reducir en gran cantidad la base de datos, pero tampoco mantener datos muy alejados a la media. 
+
+```{r}
+remove_outliers_iqr <- function(data, column_name, multiplier) {
+  column_values <- data[[column_name]]
+  
+  q1 <- quantile(column_values, 0.25, na.rm = TRUE)
+  q3 <- quantile(column_values, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  
+  lower_bound <- q1 - multiplier * iqr
+  upper_bound <- q3 + multiplier * iqr
+  
+  
+  data_clean <- data[column_values >= lower_bound & column_values <= upper_bound, ]
+  return(data_clean)
+}
+
+df_clean = df
+
+for (i in c("price", "wheelbase", "carwidth", "enginesize", "stroke", "compressionratio", "horsepower")){
+   df_clean = remove_outliers_iqr(df_clean, i, 2)
+}
+
+for (i in names(numeric_columns[numeric_columns == TRUE])){
+  create_boxplot(df_clean, i, 1.5)
+}
+
+```
+
+### Histogramas
+
+```{r}
+#Histogramas
+
+create_histogram <- function(data, column_name) {
+  hist(data[[column_name]], main=paste("Histograma de",column_name), xlab="Valores", ylab="Frecuencia", breaks = 13)
+}
+
+for (i in names(numeric_columns[numeric_columns == TRUE])){
+  create_histogram(df_clean, i)
+}
+
+```
+
+En los histogramas se puede observar la distribución de las variables numéricas, en las variables *wheelbase*, *carwidth*, *curbweight*, *enginesize*, *horsepower*, *citympg* y *price* de puede notar una distribución asimétrica sesgada a la izquierda. Por otra parte, *symboling*, *carlength*, *stroke* y *peakrpm* se asemejan más a una distribución simética. Por último las variables *carheight*, *compressionratio* y *highwaympg* muestran una distribución más asimética sesgada a la derecha. 
+
+
+### Distribución de variables categóricas
+
+```{r}
+library(ggplot2)
+
+plot_pie <- function(data, column_name) {
+  # Calcular las frecuencias de cada categoría
+  freq_table <- table(data[[column_name]])
+  
+  # Crear un gráfico de pay
+  pie_chart <- ggplot(data = data.frame(freq_table),
+                      aes(x = "", y = Freq, fill = factor(freq_table))) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar(theta = "y") +
+    labs(title = paste("Gráfico de Pay para", column_name)) +
+    scale_fill_discrete(labels = names(freq_table)) +  # Usar nombres de categorías en la leyenda
+    theme_void() +
+    theme(legend.position = "right")
+  
+  return(pie_chart)
+}
+
+for (i in names(categoric_columns[categoric_columns == TRUE])[-1]){
+  print(plot_pie(df_clean, i))
+}
+
+```
+
+
+Al analizar los gráficos de pay nos podemos percatar de varios insights, primeramente las variables *fueltype* y *enginelocation* perdieron valores posibles al momento de eliminar valores atípicos, significa que estos carros que en el anterior análisis se veía que usaban diesel o que tenian rear enginelocation eran carros atípicos en cuanto a variables numéricas. Por otra parte vemos que más del 75% de los carros tienen un carbody tipo sedan o hatchback. Más del 50% de los carros tienen un drivewheel (tipo de tracción) trasera (rwd). Más del 75% de los carros mantienen un tipo de motor ohcv. Por último, también más del 75% de los carros tienen 2 cilindros. 
+
+
+### Seleccion de variables
+
+*Revisando valores faltantes*
+
+```{r}
+sum(is.na(df_clean))
+```
+
+Dados los bloxplots, histogramas, gráficos de pay y que no existen valores faltantes, se procede a la seleccion de variables importantes para el análisis de precio:
+
+* price
+* cylindernumber
+* carbody
+* wheelbase
+* horsepower
+* carlength
+* enginesize
+
+Se seleccionaron estas variables bajo la idea que son las más influyentes en la estética y potencia del carro, por lo que se tiene la hipótesis que tendrán buena relación con el precio.
+
+
+```{r}
+# Análisis de colinealidad
+
+cor_matrix <- cor(df_clean[c('price', 'wheelbase', 'horsepower', 'carlength', 'enginesize')])
+print(cor_matrix)
+
+pairs(df_clean[c('price', 'wheelbase', 'horsepower', 'carlength', 'enginesize')], main="Diagramas de Dispersión")
+```
+
+Si observamos las gáficas como los valores de la matriz de colinealidad, la variable precio parece tener una correlación muy alta con las demás variables numéricas seleccionadas, arriba de 0.7 a excepción de wheelbase.
+
+\begin{table}[]
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+      & price     & wheelbase & horsepower          & carlength & enginesize \\ \hline
+price & 1.0000000 & 0.6204543 & 0.8179148 0.7120735 & 0.7120735 & 0.7453268  \\ \hline
+\end{tabular}
+\end{table}
+
+## Transformación de datos
+
+```{r}
+
+df_seleccionado = df_clean[c('price', 'cylindernumber', 'carbody', 'wheelbase', 'horsepower', 'carlength', 'enginesize')]
+head(df_seleccionado)
+```
+
+Ahora que tenemos nuestra seleccion de variables en un df sin valores atípicos ni faltantes, realizaremos transformación de datos de acuerdo a lo necesario. El primer paso será trabajar con las variables categóricas:
+
+* *cylindernumber*: Para esta variable nos podemos percatar que en realidad es una variable numérica escrita en texto, ya que en este caso los valores sí tienen relación de linealidad. Es decir, _four_ cylinders sí es más que _two_ cylinder. Por ello, se decide convertir la variable en variable numérica de acuerdo a un diccionario. 
+
+```{r}
+dictionary <- list(
+  "two" = 2,
+  "three" = 3,
+  "four" = 4,
+  "five" = 5,
+  "six" = 6
+)
+
+map_values <- function(value, dictionary) {
+  if (value %in% names(dictionary)) {
+    return(dictionary[[value]])
+  } else {
+    return(value)
+  }
+}
+
+df_seleccionado$cylindernumber <- sapply(df_seleccionado$cylindernumber, map_values, dictionary)
+
+```
+
+* *carbody*: Para esta variable se aplicará un one-hot encoding, construyendo una variable dummy para cada valor del tipo de carro.
+
+```{r}
+
+convert_to_dummies <- function(data, column_name) {
+  categorical_column <- data[[column_name]]
+  unique_values <- unique(categorical_column)
+  
+  dummies <- sapply(unique_values, function(value) {
+    dummy_name <- paste(column_name, value, sep = "_")
+    as.numeric(categorical_column == value)
+  })
+  
+  dummy_df <- as.data.frame(dummies)
+  
+  data <- cbind(data, dummy_df)
+  
+  data <- data[, -which(names(data) == column_name)]
+  
+  return(data)
+}
+
+df_seleccionado <- convert_to_dummies(df_seleccionado, "carbody")
+```
+
+
+```{r}
+head(df_seleccionado)
+```
+
+### Análisis de normalidad
+
+El primer análisis de normalidad en las variables numéricas se realizará mediante QQ-plots.
+
+```{r}
+plot_qqplot <- function(data, column_name) {
+  column_data <- data[[column_name]]
+  qqnorm(column_data, main = paste("QQ-Plot de", column_name))
+  qqline(column_data, col = "red")
+}
+
+
+for (i in c('price', 'wheelbase', 'horsepower', 'carlength', 'enginesize')){
+  plot_qqplot(df_seleccionado, i)
+}
+
+```
+
+Las gráficas QQplot muestran que los datos parecen ajustarse a la normalidad, sin embargo, necesitamos confirmarlo estadísticamente. Para ello haremos una prueba de . 
+
+```{r}
+library(nortest)
+
+# Realizar la prueba de normalidad de Anderson-Darling para 'price'
+ad_test_price <- ad.test(df_seleccionado$price)
+print("Anderson-Darling test for 'price':")
+print(ad_test_price)
+
+# Realizar la prueba de normalidad de Anderson-Darling para 'wheelbase'
+ad_test_wheelbase <- ad.test(df_seleccionado$wheelbase)
+print("Anderson-Darling test for 'wheelbase':")
+print(ad_test_wheelbase)
+
+# Realizar la prueba de normalidad de Anderson-Darling para 'horsepower'
+ad_test_horsepower <- ad.test(df_seleccionado$horsepower)
+print("Anderson-Darling test for 'horsepower':")
+print(ad_test_horsepower)
+
+# Realizar la prueba de normalidad de Anderson-Darling para 'carlength'
+ad_test_carlength <- ad.test(df_seleccionado$carlength)
+print("Anderson-Darling test for 'carlength':")
+print(ad_test_carlength)
+
+# Realizar la prueba de normalidad de Anderson-Darling para 'enginesize'
+ad_test_enginesize <- ad.test(df_seleccionado$enginesize)
+print("Anderson-Darling test for 'enginesize':")
+print(ad_test_enginesize)
+```
+
+Los resultados de la prueba de normalidad de Anderson-Darling para las diferentes variables son los siguientes:
+
+1. **'price'**:
+   - Estadístico de Anderson-Darling (A) = 6.3209
+   - Valor p (p-value) = 1.385e-15 (muy cercano a cero)
+   El valor p extremadamente bajo (cercano a cero) sugiere que los datos en la variable 'price' no siguen una distribución normal. Esto significa que la variable 'price' no se ajusta bien a una distribución normal y es estadísticamente significativamente diferente de una distribución normal.
+
+2. **'wheelbase'**:
+   - Estadístico de Anderson-Darling (A) = 4.1518
+   - Valor p (p-value) = 2.289e-10 (muy cercano a cero)
+   El valor p extremadamente bajo (cercano a cero) sugiere que los datos en la variable 'wheelbase' no siguen una distribución normal. Al igual que en el caso anterior, esto indica que la variable 'wheelbase' no se ajusta bien a una distribución normal y es estadísticamente significativamente diferente de una distribución normal.
+
+3. **'horsepower'**:
+   - Estadístico de Anderson-Darling (A) = 4.8539
+   - Valor p (p-value) = 4.595e-12 (muy cercano a cero)
+   El valor p extremadamente bajo (cercano a cero) sugiere que los datos en la variable 'horsepower' no siguen una distribución normal. Una vez más, esto indica que la variable 'horsepower' no se ajusta bien a una distribución normal y es estadísticamente significativamente diferente de una distribución normal.
+
+4. **'carlength'**:
+   - Estadístico de Anderson-Darling (A) = 1.2891
+   - Valor p (p-value) = 0.002313 (pequeño, pero no extremadamente bajo)
+   En este caso, el valor p es pequeño pero no extremadamente bajo. Esto sugiere que los datos en la variable 'carlength' no siguen una distribución normal, pero la desviación de la normalidad podría ser menos pronunciada en comparación con las otras variables.
+
+5. **'enginesize'**:
+   - Estadístico de Anderson-Darling (A) = 4.2065
+   - Valor p (p-value) = 1.687e-10 (muy cercano a cero)
+   Al igual que en los casos anteriores, el valor p extremadamente bajo (cercano a cero) sugiere que los datos en la variable 'enginesize' no siguen una distribución normal y son estadísticamente significativamente diferentes de una distribución normal.
+
+En resumen, los resultados de las pruebas de Anderson-Darling indican que las variables 'price', 'wheelbase', 'horsepower' y 'enginesize' no siguen una distribución normal. La variable 'carlength' también muestra desviaciones de la normalidad, aunque menos pronunciadas en comparación con las otras variables. Esto tiene implicaciones importantes para el análisis estadístico, ya que muchos métodos paramétricos asumen normalidad en los datos. Puede ser necesario considerar enfoques no paramétricos o transformaciones de datos para abordar estas desviaciones de la normalidad, dependiendo de los objetivos de tu análisis.
+
+**Normalización** 
+
+Se intentará normalizar las variables mediante transformaciones. El primer intento de normalización será aplicar una transformación lograritmica.
+
+```{r}
+# Aplicar la transformación logarítmica a las variables
+df_seleccionado$log_price <- log(df_seleccionado$price)
+df_seleccionado$log_wheelbase <- log(df_seleccionado$wheelbase)
+df_seleccionado$log_horsepower <- log(df_seleccionado$horsepower)
+df_seleccionado$log_carlength <- log(df_seleccionado$carlength)
+df_seleccionado$log_enginesize <- log(df_seleccionado$enginesize)
+
+# Verificar la normalidad de las variables transformadas con QQ-plots
+library(ggplot2)
+
+plot_qqplot <- function(data, column_name) {
+  column_data <- data[[column_name]]
+  qqnorm(column_data, main = paste("QQ-Plot de", column_name))
+  qqline(column_data, col = "red")
+}
+
+for (i in c('log_price', 'log_wheelbase', 'log_horsepower', 'log_carlength', 'log_enginesize')){
+  plot_qqplot(df_seleccionado, i)
+}
+
+```
+
+**Anderson Darling test para variables transformadas**
+
+```{r}
+ad_test_price <- ad.test(df_seleccionado$log_price)
+ad_test_wheelbase <- ad.test(df_seleccionado$log_wheelbase)
+ad_test_horsepower <- ad.test(df_seleccionado$log_horsepower)
+ad_test_carlength <- ad.test(df_seleccionado$log_carlength)
+ad_test_enginesize <- ad.test(df_seleccionado$log_enginesize)
+
+# Mostrar los resultados de la prueba de Anderson-Darling
+print("Anderson-Darling test for 'log_price':")
+print(ad_test_price)
+
+print("Anderson-Darling test for 'log_wheelbase':")
+print(ad_test_wheelbase)
+
+print("Anderson-Darling test for 'log_horsepower':")
+print(ad_test_horsepower)
+
+print("Anderson-Darling test for 'log_carlength':")
+print(ad_test_carlength)
+
+print("Anderson-Darling test for 'log_enginesize':")
+print(ad_test_enginesize)
+```
+
+-Los valores p son muy pequeños en todas las variables, lo que indica que los datos transformados ('log_price', 'log_wheelbase', 'log_horsepower', 'log_carlength', 'log_enginesize') no siguen una distribución normal.
+
+- Dado que los valores p son significativamente menores que un nivel de significancia típico de 0.05, podemos rechazar la hipótesis nula de normalidad en todos los casos.
+
+- Esto significa que las variables transformadas no son normalmente distribuidas. Es importante tener en cuenta que la normalidad no es un requisito estricto para todas las técnicas de análisis estadístico. Dependerá de tus objetivos analíticos específicos si esta falta de normalidad es un problema o no. Puedes considerar métodos estadísticos que no requieran normalidad o explorar otras transformaciones de datos si es necesario.
+
+**Intentando normalizar con yeo-johnson**
+
+```{r}
+
+# Eliminar las variables transformadas logarítmicamente del DataFrame
+df_seleccionado <- df_seleccionado[, !names(df_seleccionado) %in% c("log_price", "log_wheelbase", "log_horsepower", "log_carlength", "log_enginesize")]
+
+
+library(nortest)
+library(VGAM)
+
+plot_p_values_by_lambda <- function(data, variable_name) {
+  val_without_0 <- data[[variable_name]][data[[variable_name]] != 0]
+  q1c <- quantile(val_without_0, probs = 0.25)
+  q3c <- quantile(val_without_0, probs = 0.75)
+  ric <- IQR(val_without_0)
+  
+  val <- val_without_0[val_without_0 < q3c + 1.5 * ric]
+  
+  lp <- seq(-4, 2, 0.001)
+  nlp <- length(lp)
+  n <- length(val)
+  
+  D <- matrix(as.numeric(NA), ncol = 2, nrow = nlp)
+  
+  for (i in 1:nlp) {
+    d <- yeo.johnson(val, lambda = lp[i])
+    p <- ad.test(d)
+    D[i, ] <- c(lp[i], p$p.value)
+  }
+  
+  N <- as.data.frame(D)
+  
+  plot(N$V1, N$V2,
+       type = "l",
+       col = "darkred",
+       lwd = 3,
+       xlab = "Lambda",
+       ylab = "Valor p (Normalidad)",
+       main = paste("P-values por Lambda para", variable_name))
+}
+
+for (i in c('price', 'wheelbase', 'horsepower', 'carlength', 'enginesize')){
+  plot_p_values_by_lambda(df_seleccionado, i)
+}
+
+
+```
+
+En las gráficas de p value vs lambda para la pruebad de yeo-johnson demuestra que no es posible alcanzar el valo p mayor a 0.05 para comprobar normalidad en las variables. Sin embargo, como ya se mencionó es importante tener en cuenta que la normalidad no es un requisito estricto para todas las técnicas de análisis estadístico.
+
+```{r}
+df_seleccionado
+```
+## ANALIZA LOS DATOS Y PREGUNTA BASE 
+
+Dado el contexto del proyecto y los datos proporcionados, elegiré la herramienta estadística de **regresión lineal múltiple** como una de las técnicas para analizar y validar el modelo. Además, utilizaré **pruebas de hipótesis de medias** para evaluar la significancia de los coeficientes de regresión y la influencia de las variables predictoras en la variable de respuesta. 
+
+**Regresión Lineal Múltiple**:
+- **Justificación**: La regresión lineal múltiple es una herramienta adecuada para analizar la relación entre múltiples variables predictoras (características de los automóviles) y una variable de respuesta continua (el precio de los automóviles). Dado que el objetivo principal parece ser predecir el precio de los automóviles en función de diversas características, la regresión lineal múltiple permite modelar esta relación y evaluar la contribución de cada variable predictora.
+
+**Pruebas de Hipótesis de Medias**:
+- **Justificación**: Las pruebas de hipótesis de medias son útiles para determinar si existe una diferencia significativa en la variable de respuesta (precio) entre diferentes grupos o categorías de variables predictoras categóricas (como el tipo de carrocería o el tipo de motor). Esto puede proporcionar información valiosa sobre cómo las características categóricas influyen en el precio de los automóviles.
+
+Para validar el modelo de regresión lineal múltiple y evaluar los supuestos requeridos por el modelo, realizaré las siguientes acciones:
+
+1. **Linealidad**: Verificaré la linealidad mediante gráficos de dispersión de las variables predictoras frente a la variable de respuesta y asegurándome de que no haya patrones no lineales evidentes en los residuos.
+
+2. **Independencia de Errores**: Examinaré la independencia de errores mediante gráficos de autocorrelación de los residuos y asegurándome de que no haya patrones discernibles.
+
+3. **Homocedasticidad**: Evaluaré la homocedasticidad mediante gráficos de residuos frente a valores ajustados y pruebas estadísticas como el test de Breusch-Pagan o White para verificar la constancia de la varianza de los residuos.
+
+4. **Normalidad de Errores**: Realizaré pruebas de normalidad de los residuos, como el test de Shapiro-Wilk o gráficos QQ-plot, para verificar si los residuos siguen una distribución normal.
+
+5. **No Multicolinealidad**: Comprobaré la multicolinealidad calculando la matriz de correlación entre las variables predictoras y evaluando si existe una alta correlación entre ellas.
+
+Una vez realizadas estas verificaciones y, si es necesario, aplicadas las transformaciones adecuadas en caso de violación de supuestos, procederé a construir el modelo de regresión lineal múltiple. Luego, utilizaré pruebas de hipótesis para evaluar la significancia de los coeficientes de regresión y determinar qué variables predictoras tienen un impacto significativo en el precio de los automóviles. Esto ayudará a proporcionar una comprensión más sólida de cómo se relacionan las características de los automóviles con sus precios.
+
+
+### Modelo de regresion lineal multiple
+
+```{r}
+modelo_regresion <- lm(price ~ ., data = df_seleccionado)
+
+summary(modelo_regresion)
+
+```
+
+Los resultados de la regresión lineal múltiple indican lo siguiente:
+
+1. **Residuals**: Esta sección muestra estadísticas descriptivas de los residuos del modelo. Los residuos son las diferencias entre los valores observados y los valores predichos por el modelo. En este caso, los residuos varían desde -5060.4 hasta 8333.9.
+
+2. **Coefficients**: Esta tabla muestra los coeficientes de regresión estimados para cada una de las variables independientes en el modelo:
+
+   - **Intercept**: El valor estimado del intercepto es -34508.765. Representa el valor estimado de la variable dependiente (price) cuando todas las variables independientes son iguales a cero.
+   
+   - **cylindernumber**: El coeficiente estimado para cylindernumber es 335.406, pero no es significativamente diferente de cero, ya que el valor p es 0.516694. Esto sugiere que no hay evidencia suficiente para afirmar que cylindernumber tiene un efecto significativo en el precio.
+   
+   - **wheelbase**: El coeficiente estimado para wheelbase es 252.540, y es estadísticamente significativo (valor p = 0.001697). Esto sugiere que existe una relación significativa entre la longitud de la distancia entre ejes (wheelbase) y el precio.
+   
+   - **horsepower**: El coeficiente estimado para horsepower es 90.527, y es altamente significativo (valor p = 2.61e-13). Esto indica que la potencia del motor (horsepower) tiene un efecto significativo en el precio.
+   
+   - **carlength**: El coeficiente estimado para carlength es 44.249, pero no es significativamente diferente de cero (valor p = 0.300866). No hay evidencia suficiente para afirmar que la longitud del automóvil (carlength) tiene un efecto significativo en el precio.
+   
+   - **enginesize**: El coeficiente estimado para enginesize es 6.191, pero no es significativamente diferente de cero (valor p = 0.771366). No hay evidencia suficiente para afirmar que el tamaño del motor (enginesize) tiene un efecto significativo en el precio.
+   
+   - **convertible**: El coeficiente estimado para convertible es 6686.099 y es significativo (valor p = 0.000126). Esto sugiere que el tipo de automóvil convertible tiene un efecto significativo en el precio.
+   
+   - **hatchback**: El coeficiente estimado para hatchback es 2195.988, pero no es significativamente diferente de cero (valor p = 0.088200). No hay evidencia suficiente para afirmar que el tipo de automóvil hatchback tiene un efecto significativo en el precio.
+   
+   - **sedan**: El coeficiente estimado para sedan es 2651.576 y es significativo (valor p = 0.043492). Esto sugiere que el tipo de automóvil sedán tiene un efecto significativo en el precio.
+   
+   - **wagon**: El coeficiente estimado para wagon es 1565.714, pero no es significativamente diferente de cero (valor p = 0.264294). No hay evidencia suficiente para afirmar que el tipo de automóvil wagon tiene un efecto significativo en el precio.
+   
+   - **hardtop**: La variable hardtop tiene un valor "NA" en todos los coeficientes, lo que sugiere que puede haber problemas de multicolinealidad o falta de variabilidad en esta variable.
+
+3. **Residual standard error**: Esta es una medida de la variabilidad no explicada por el modelo. En este caso, es de aproximadamente 2364.
+
+4. **Multiple R-squared**: Representa la proporción de la variabilidad en la variable dependiente (price) que es explicada por el modelo. En este caso, el modelo explica aproximadamente el 77.06% de la variabilidad en el precio.
+
+5. **Adjusted R-squared**: Similar al R-cuadrado múltiple, pero ajustado por el número de variables independientes en el modelo. En este caso, es de aproximadamente 75.69%.
+
+6. **F-statistic**: Esta estadística se utiliza para evaluar si al menos una de las variables independientes tiene un efecto significativo en la variable dependiente. Un valor pequeño del p-valor (p-value) indica que al menos una variable es significativa. En este caso, el p-valor es extremadamente pequeño (p-value: < 2.2e-16), lo que sugiere que al menos una de las variables independientes es significativa en la predicción del precio.
+
+En resumen, el modelo de regresión lineal múltiple sugiere que las variables horsepower, wheelbase, convertible y sedan son significativas para predecir el precio de los automóviles, mientras que otras variables no lo son. 
+
+A partir de aquí comenzaremos a retirar variables una por una dependiendo de su valor p y observaremos los resultados de los modelos para mantener el mejor. De primera quitaremos **hardtop** por su error y **enginezise** por tener el mayor valor P.
+
+```{r}
+df_seleccionado_sin_vars <- df_seleccionado[, !(names(df_seleccionado) %in% c("hardtop", "enginesize"))]
+
+modelo <- lm(price ~ ., data = df_seleccionado_sin_vars)
+
+summary(modelo)
+```
+Sigue retirar la variable **wagon**
+
+```{r}
+df_seleccionado_sin_vars <- df_seleccionado[, !(names(df_seleccionado) %in% c("hardtop", "enginesize", "wagon"))]
+
+modelo <- lm(price ~ ., data = df_seleccionado_sin_vars)
+
+summary(modelo)
+```
+
+Ahora la variable **carlength**
+
+```{r}
+df_seleccionado_sin_vars <- df_seleccionado[, !(names(df_seleccionado) %in% c("hardtop", "enginesize", "wagon", "carlength"))]
+
+modelo <- lm(price ~ ., data = df_seleccionado_sin_vars)
+
+summary(modelo)
+```
+
+```{r}
+df_seleccionado_sin_vars <- df_seleccionado[, !(names(df_seleccionado) %in% c("hardtop", "enginesize", "wagon", "carlength", "hatchback" ))]
+
+modelo <- lm(price ~ ., data = df_seleccionado_sin_vars)
+
+summary(modelo)
+```
+
+```{r}
+df_seleccionado_sin_vars <- df_seleccionado[, !(names(df_seleccionado) %in% c("hardtop", "enginesize", "wagon", "carlength", "hatchback", "cylindernumber"))]
+
+modelo <- lm(price ~ ., data = df_seleccionado_sin_vars)
+
+summary(modelo)
+```
+
+En general, el modelo tiene un coeficiente de determinación ajustado (Adjusted R-squared) de aproximadamente 0.7549, lo que significa que alrededor del 75.49% de la variabilidad en el precio se explica por las variables incluidas en el modelo. El F-statistic es significativo (p-valor < 0.001), lo que sugiere que al menos una de las variables independientes tiene un efecto significativo en el precio.
+
+Este modelo, después de retirar las variables que no eran estadísticamente significativas, muestra una buena capacidad para explicar la variabilidad en el precio de los automóviles. Las variables "wheelbase", "horsepower", "convertible" y "sedan" son las que más contribuyen a la predicción del precio.
+
+###Visualización del modelo
+
+```{r}
+# Gráfico de dispersión y línea de regresión
+plot(df_seleccionado_sin_vars$price, fitted(modelo), 
+     xlab = "Precio Real", ylab = "Precio Predicho", 
+     main = "Gráfico de Dispersión y Línea de Regresión")
+abline(0, 1, col = "red")
+
+```
+1. **Gráfico de Dispersión y Línea de Regresión**: La mayoría de los puntos de datos se encuentran cerca de la línea de regresión, lo que indica que el modelo se ajusta razonablemente bien a los datos observados. Los valores reales y predichos están en buena concordancia, lo que sugiere una relación lineal entre las variables predictoras y la variable objetivo.
+
+```{r}
+# Gráfico de residuos vs. Valores ajustados
+plot(fitted(modelo), residuals(modelo), 
+     xlab = "Valores Ajustados", ylab = "Residuos", 
+     main = "Gráfico de Residuos vs. Valores Ajustados")
+abline(0, 0, col = "red")
+```
+2. **Gráfico de Residuos vs. Valores Ajustados**: En este gráfico, los residuos parecen distribuirse aleatoriamente alrededor de la línea cero, lo que indica que no hay un patrón sistemático en los residuos. Esto sugiere que el modelo no tiene problemas de sesgo y que la varianza de los errores es constante (homocedasticidad).
+
+```{r}
+# Histograma de residuos
+hist(residuals(modelo), 
+     xlab = "Residuos", ylab = "Frecuencia",
+     main = "Histograma de Residuos")
+
+```
+3. **Histograma de Residuos**: El histograma de residuos muestra una forma similar a una campana gaussiana, lo que sugiere que los residuos siguen aproximadamente una distribución normal. Esto es un buen indicador de que el supuesto de normalidad de los residuos se cumple, lo que es importante para realizar inferencias estadísticas.
+
+```{r}
+# Gráfico QQ de residuos
+qqnorm(residuals(modelo))
+qqline(residuals(modelo), col = "red")
+```
+
+4. **Gráfico QQ de Residuos**: En el gráfico QQ de residuos, los puntos se ajustan muy bien a la línea diagonal, lo que también respalda la suposición de normalidad de los residuos. Esto sugiere que los residuos siguen una distribución normal.
+
+En conclusión, basándonos en el análisis de las gráficas y los residuos, el modelo de regresión lineal múltiple parece ser una buena representación de la relación entre las variables predictoras (cylindernumber, wheelbase, horsepower, convertible, sedan) y el precio de los automóviles. Los supuestos clave del modelo, como la linealidad, homocedasticidad y normalidad de los residuos, parecen cumplirse satisfactoriamente. Sin embargo, es importante recordar que un buen ajuste del modelo no garantiza la causalidad ni la ausencia de otros posibles predictores relevantes que no se hayan incluido en el modelo. Por lo tanto, estos resultados son una base sólida para el análisis, pero siempre es importante considerar el contexto y las limitaciones del estudio.
